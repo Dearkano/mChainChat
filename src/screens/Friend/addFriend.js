@@ -2,18 +2,19 @@ import React from 'react';
 import {Button, InputItem, List, TextareaItem} from '@ant-design/react-native';
 import {withNavigation} from 'react-navigation';
 import {
-    StyleSheet,
-    Image,
-    ScrollView,
-    View,
-    Text,
-    TouchableOpacity,
-    Linking,
-  } from 'react-native';
+  StyleSheet,
+  Image,
+  ScrollView,
+  View,
+  Text,
+  TouchableOpacity,
+  Linking,
+} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import bs58 from 'bs58';
 import {Buffer} from 'buffer';
 import sha256 from 'sha256';
+import g from '../../state';
 
 const afshost = 'http://183.178.144.228:8100';
 
@@ -48,13 +49,18 @@ class AddFriend extends React.Component {
     );
     const hash = sha256.x2(receiverPublicKey);
     const receiver = bs58.encode(Buffer.from(hash, 'hex'));
-    this.setState({receiver, receiverPublicKey});
+    this.setState({
+      receiver,
+      receiverPublicKey,
+    });
   }
   submit = async () => {
     const {remark, receiver, receiverPublicKey} = this.state;
-    this.props.navigation.navigate('Chat', {
-        receiver
-      });
+    g.addFriend({
+      addr: receiver,
+      remark,
+    });
+    this.props.navigation.navigate('Friend');
     // get Previous Friend List AFID by tag
     // const res1 = await fetch(`${afshost}/`)
   };
@@ -63,14 +69,19 @@ class AddFriend extends React.Component {
     return (
       <View style={styles.col}>
         <List renderHeader={''}>
-          <TextareaItem rows={3}  value={receiver} editable={false} placeholder="Addr" />
+          <TextareaItem
+            rows={3}
+            value={receiver}
+            editable={false}
+            placeholder="Addr"
+          />
           <InputItem
             value={remark}
             onChange={e => this.setState({remark: e})}
             placeholder="Remark"
           />
           <Button type="primary" onPress={() => this.submit()}>
-            <Text>Add Friend</Text>
+            <Text> Add Friend </Text>
           </Button>
         </List>
       </View>
@@ -78,5 +89,4 @@ class AddFriend extends React.Component {
   }
 }
 
-
-export default withNavigation(AddFriend)
+export default withNavigation(AddFriend);

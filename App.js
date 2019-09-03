@@ -108,9 +108,9 @@ const AppStack = createStackNavigator(
     QrCode: QrCodeScreen,
     AddFriend: AddFriendScreen,
   },
-  {initialRouteName: 'Friend'},
+  {initialRouteName: 'Friend', headerMode: 'none'},
 );
-const AuthStack = createStackNavigator({LoginIn: LoginScreen});
+const AuthStack = createStackNavigator({LoginIn: LoginScreen},{headerMode: 'none'});
 //GLOBAL.XMLHttpRequest = GLOBAL.originalXMLHttpRequest || GLOBAL.XMLHttpRequest
 console.disableYellowBox = true;
 export default createAppContainer(
@@ -121,7 +121,7 @@ export default createAppContainer(
       Auth: AuthStack,
     },
     {
-      initialRouteName: 'AuthLoading',
+      initialRouteName: 'AuthLoading'
     },
   ),
 );

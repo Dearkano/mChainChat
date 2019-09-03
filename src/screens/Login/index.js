@@ -1,23 +1,39 @@
 // 'use strict';
 import React from 'react';
 import {StyleSheet, View, Text, WebView, Component} from 'react-native';
-import {Button, InputItem, List} from '@ant-design/react-native';
+import {Button, InputItem, List, PickerView} from '@ant-design/react-native';
 import md5 from 'md5';
 import sha256 from 'sha256';
 import bs58 from 'bs58';
 import {Buffer} from 'buffer';
 import {withNavigation} from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
+import g from '../../state';
+import io from 'socket.io-client';
 
 const host = 'http://183.178.144.228:8100';
+
+const clusterOptions = [
+  [
+    {
+      value: '47.75.197.211:8085',
+      label: 'ACAC',
+    },
+    {
+      value: '139.159.244.231:8085',
+      label: 'AAAF',
+    },
+  ],
+];
 
 const styles = StyleSheet.create({
   col: {
     flex: 1,
     flexDirection: 'column',
     // alignItems: 'center', // this will prevent TFs from stretching horizontal
-    marginLeft: 7,
-    marginRight: 7,
+    marginLeft: 30,
+    marginRight: 30,
+    justifyContent: 'center'
     // backgroundColor: MKColor.Lime,
   },
   textfield: {
@@ -105,12 +121,55 @@ class Login extends React.Component {
       addr,
     });
     await AsyncStorage.setItem('userInfo', userInfoStr);
+    g.login({
+      username,
+      token,
+      expiredTime,
+      publicKey,
+      privateKey,
+      addr,
+    });
+
+    // connect with server
+    const body4 = new FormData();
+    body4.append('token', token);
+    // const encrypt = new JsEncrypt();
+    // encrypt.setPublicKey(this.state.receiverPublicKey);
+    // const encryptedContent = encrypt.encrypt(this.refs.input.state.value);
+    // body.append("message", encryptedContent);
+    body4.append('message', publicKey);
+    const res4 = await fetch(`${host}/msg/upload`, {
+      method: 'post',
+      body: body4,
+    });
+    const data4 = await res4.json();
+    console.log(data4)
+    const isSuccess4 = data4.SuccStatus > 0;
+    if (!isSuccess4) return;
+    const afid = data4.Afid;
+
+    const uri = `ws://${this.state.host}?user=${addr}`;
+    console.log(uri)
+    const ws = io(uri);
+    ws.on('connect', async function() {
+      console.log('on connection');
+      ws.emit('publicKey', JSON.stringify({publicKey: afid, username: addr}));
+      g.setWs(ws);
+    });
+
+    g.setHost(this.state.host);
+
     console.log(userInfoStr);
     this.props.navigation.navigate('Friend');
     //   this.props.navigation.navigate('Chat', {
     //     receiver: 'FuKTBcX8jUcQxg2FntSwx89GRmeXNCw5o6BjYmmEjWoV',
     //   });
   };
+
+  onChange = value => {
+    this.setState({host: value});
+  };
+
   render() {
     const {username, password} = this.state;
     return (
@@ -126,6 +185,12 @@ class Login extends React.Component {
             onChange={e => this.setState({password: e})}
             placeholder="Password"
             type="password"
+          />
+          <PickerView
+            onChange={this.onChange}
+            value={this.state.host}
+            data={clusterOptions}
+            cascade={false}
           />
           <Button type="primary" onPress={() => this.login()}>
             <Text>Login</Text>

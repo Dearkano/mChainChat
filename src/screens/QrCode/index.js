@@ -44,13 +44,7 @@ class QrCode extends React.Component {
     return (
       <QRCodeScanner
         onRead={this.onSuccess}
-        topContent={
-          <Text style={styles.centerText}>
-            Go to
-            <Text style={styles.textBold}>wikipedia.org/wiki/QR_code</Text> on
-            your computer and scan the QR code.
-          </Text>
-        }
+        topContent={null}
         bottomContent={
           <TouchableOpacity style={styles.buttonTouchable}>
             <Text style={styles.buttonText}>OK. Got it!</Text>
