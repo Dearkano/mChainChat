@@ -56,7 +56,7 @@ class AddFriend extends React.Component {
   }
   submit = async () => {
     const {remark, receiver, receiverPublicKey} = this.state;
-    g.addFriend({
+    await g.addFriend({
       addr: receiver,
       remark,
     });

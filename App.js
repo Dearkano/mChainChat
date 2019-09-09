@@ -17,6 +17,7 @@ import ChatScreen from './src/screens/Chat';
 import FriendScreen from './src/screens/Friend';
 import QrCodeScreen from './src/screens/QrCode';
 import AddFriendScreen from './src/screens/Friend/addFriend';
+import RegisterScreen from './src/screens/Register';
 
 import Permissions from 'react-native-permissions';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -110,7 +111,10 @@ const AppStack = createStackNavigator(
   },
   {initialRouteName: 'Friend', headerMode: 'none'},
 );
-const AuthStack = createStackNavigator({LoginIn: LoginScreen},{headerMode: 'none'});
+const AuthStack = createStackNavigator(
+  {LoginIn: LoginScreen, Register: RegisterScreen},
+  {headerMode: 'none', initialRouteName: 'LoginIn'},
+);
 //GLOBAL.XMLHttpRequest = GLOBAL.originalXMLHttpRequest || GLOBAL.XMLHttpRequest
 console.disableYellowBox = true;
 export default createAppContainer(
@@ -121,7 +125,7 @@ export default createAppContainer(
       Auth: AuthStack,
     },
     {
-      initialRouteName: 'AuthLoading'
+      initialRouteName: 'AuthLoading',
     },
   ),
 );

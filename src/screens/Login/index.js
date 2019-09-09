@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     // alignItems: 'center', // this will prevent TFs from stretching horizontal
     marginLeft: 30,
     marginRight: 30,
-    justifyContent: 'center'
+    justifyContent: 'center',
     // backgroundColor: MKColor.Lime,
   },
   textfield: {
@@ -43,6 +43,10 @@ const styles = StyleSheet.create({
   textfieldWithFloatingLabel: {
     height: 48, // have to do it on iOS
     marginTop: 10,
+  },
+  register: {
+    color: '#1890ff',
+    marginTop: 20,
   },
 });
 
@@ -106,10 +110,10 @@ class Login extends React.Component {
     console.log(data2);
     const isSuccess2 = data2.SuccStatus > 0;
     if (!isSuccess2) return;
-    // const publicKey = data2.PublicKey;
-    // const privateKey = data2.PrivateKey;
-    const privateKey = data2.PublicKey;
-    const publicKey = data2.PrivateKey;
+    const publicKey = data2.PublicKey;
+    const privateKey = data2.PrivateKey;
+    // const privateKey = data2.PublicKey;
+    // const publicKey = data2.PrivateKey;
     const hash = sha256.x2(publicKey);
     const addr = bs58.encode(Buffer.from(hash, 'hex'));
     const userInfoStr = JSON.stringify({
@@ -143,13 +147,13 @@ class Login extends React.Component {
       body: body4,
     });
     const data4 = await res4.json();
-    console.log(data4)
+    console.log(data4);
     const isSuccess4 = data4.SuccStatus > 0;
     if (!isSuccess4) return;
     const afid = data4.Afid;
 
     const uri = `ws://${this.state.host}?user=${addr}`;
-    console.log(uri)
+    console.log(uri);
     const ws = io(uri);
     ws.on('connect', async function() {
       console.log('on connection');
@@ -196,6 +200,11 @@ class Login extends React.Component {
             <Text>Login</Text>
           </Button>
         </List>
+        <Text
+          onPress={() => this.props.navigation.navigate('Register')}
+          style={styles.register}>
+          Register now!
+        </Text>
       </View>
     );
   }

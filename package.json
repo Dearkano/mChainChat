@@ -1,5 +1,5 @@
 {
-  "name": "mChainChat",
+  "name": "ChainChat",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -14,7 +14,7 @@
     "jsencrypt": "^3.0.0-rc.1",
     "md5": "^2.2.1",
     "react": "16.8.6",
-    "react-chat-elements": "^10.7.1",
+    "react-chainchat-elements": "^10.7.1",
     "react-elements": "^1.3.1",
     "react-native": "0.60.5",
     "react-native-camera": "^3.3.0",

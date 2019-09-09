@@ -104,7 +104,7 @@ class App extends Component {
         encrypt.setPublicKey(publicKey);
         encrypt.setPrivateKey(privateKey);
         const mes = encrypt.decrypt(d.Message);
-        const receiverId = Number('0x'+ bs58.decode(receiver).toString('hex'));
+        const receiverId = Number('0x' + bs58.decode(receiver).toString('hex'));
         const newMessages = [
           {
             text: mes,
@@ -139,7 +139,7 @@ class App extends Component {
         encrypt.setPublicKey(publicKey);
         encrypt.setPrivateKey(privateKey);
         const mes = encrypt.decrypt(d.Message);
-        const receiverId = Number('0x'+ bs58.decode(receiver).toString('hex'));
+        const receiverId = Number('0x' + bs58.decode(receiver).toString('hex'));
         newMessages = [
           {
             text: mes,
@@ -149,7 +149,7 @@ class App extends Component {
               name: receiver,
               avatar: 'https://placeimg.com/140/140/any',
             },
-            _id: Math.round(Math.random() * 1000000)
+            _id: Math.round(Math.random() * 1000000),
           },
         ];
       } else if (type === 'image') {
@@ -159,7 +159,7 @@ class App extends Component {
         const data = await res.blob();
         const base64 = await convertFile(data);
         console.log(base64);
-        const receiverId = Number('0x'+ bs58.decode(receiver).toString('hex'));
+        const receiverId = Number('0x' + bs58.decode(receiver).toString('hex'));
         newMessages = [
           {
             image: base64,
@@ -169,7 +169,7 @@ class App extends Component {
               name: receiver,
               avatar: 'https://placeimg.com/140/140/any',
             },
-            _id: Math.round(Math.random() * 1000000)
+            _id: Math.round(Math.random() * 1000000),
           },
         ];
       }
@@ -249,8 +249,8 @@ class App extends Component {
         data: afid,
       }),
     );
-    const userId = Number('0x'+ bs58.decode(addr).toString('hex'));
-    console.log('userid'+userId)
+    const userId = Number('0x' + bs58.decode(addr).toString('hex'));
+    console.log('userid' + userId);
     this.setState(previousState => {
       const sentMessages = [
         {
@@ -303,27 +303,8 @@ class App extends Component {
     Object.keys(file).forEach(key => {
       body.append(key, body[key]);
     });
-    console.log(body);
-    const res = await fetch(`${host1}/file/upload`, {method: 'post', body});
-    const data = await res.json();
-    console.log(data);
-    if (data.SuccStatus <= 0) return;
-    const afid = data.Afid;
-    this.state.ws.emit(
-      'image',
-      JSON.stringify({
-        sender: addr,
-        receiver,
-        data: afid,
-      }),
-    );
-    // const messagesToUpload = messages.map(message => ({
-    //   ...message,
-    //   user,
-    //   createdAt,
-    //   _id: Math.round(Math.random() * 1000000),
-    // }));
-    const userId = Number('0x'+ bs58.decode(addr).toString('hex'));
+
+    const userId = Number('0x' + bs58.decode(addr).toString('hex'));
     this.setState(previousState => {
       const sentMessages = [
         {
@@ -341,6 +322,18 @@ class App extends Component {
         messages: previousState.messages.concat(sentMessages),
       };
     });
+    const res = await fetch(`${host1}/file/upload`, {method: 'post', body});
+    const data = await res.json();
+    if (data.SuccStatus <= 0) return;
+    const afid = data.Afid;
+    this.state.ws.emit(
+      'image',
+      JSON.stringify({
+        sender: addr,
+        receiver,
+        data: afid,
+      }),
+    );
   };
 
   renderAccessory = () => <AccessoryBar onSend={this.onSendFromUser} />;
@@ -418,22 +411,23 @@ class App extends Component {
   render() {
     console.log(this.state.messages);
     const receiver = this.props.navigation.getParam('receiver');
+    const remark = this.props.navigation.getParam('remark');
     const {userInfo} = this.state;
     if (!userInfo) return null;
-    curUserId = Number('0x'+ bs58.decode(userInfo.addr).toString('hex'));
+    curUserId = Number('0x' + bs58.decode(userInfo.addr).toString('hex'));
     console.log(curUserId);
     const curUser = {
       _id: curUserId,
       name: userInfo.addr,
     };
-    const messages = [].concat(this.state.messages)
+    const messages = [].concat(this.state.messages);
     return (
       <View
         style={styles.container}
         accessible
         accessibilityLabel="main"
         testID="main">
-        <NavBar user={receiver} />
+        <NavBar user={remark} />
         <GiftedChat
           messages={messages.reverse()}
           onSend={this.onSend}

@@ -10,11 +10,10 @@ class CustomNavBar extends React.Component {
         return (
             <NavBar>
               <NavButton onPress={()=>this.props.navigation.navigate('Friend')}>
-                <Icons name="arrow-left" size={20} color="#fff" />
+                <Icons name="arrow-left" size={20} color="#444" />
               </NavButton>
               <NavTitle>
-                {' '}
-                <Text>{this.props.user}</Text>{' '}
+                <Text>{this.props.user}</Text>
               </NavTitle>
               <NavButton />
             </NavBar>

@@ -1,5 +1,5 @@
 import React from 'react';
-import {ChatItem} from 'react-chat-elements/native';
+import {ChatItem} from 'react-chainchat-elements/native';
 import {
   StyleSheet,
   Image,
@@ -23,14 +23,16 @@ class FriendList extends React.Component {
   state = {
     visible: false,
   };
-  componentDidMount() {}
+  async componentDidMount() {
+    await g.getFriendList();
+  }
   showModal = () => {
     this.setState({visible: true});
   };
   render() {
     const footerButtons = [
-        { text: 'Ok', onPress: () => this.setState({visible: false}) },
-      ];
+      {text: 'Ok', onPress: () => this.setState({visible: false})},
+    ];
     const {navigation} = this.props;
     return (
       <AntdProvider>
@@ -45,8 +47,7 @@ class FriendList extends React.Component {
                   closable
                   transparent
                   maskClosable
-                  footer={footerButtons}
-                  >
+                  footer={footerButtons}>
                   <QRCode value={G.state.userInfo.publicKey} size={250} />
                 </Modal>
                 <Header
@@ -80,26 +81,34 @@ class FriendList extends React.Component {
                   showsHorizontalScrollIndicator={false}
                   showsVerticalScrollIndicator={false}>
                   <List renderHeader={'Friends'}>
-                    {G.state.friendList.map(item => (
+                    {G.state.messageList.map(item => (
                       <Item
+                        style={{border: 'none'}}
                         onPress={() => {
                           navigation.navigate('Chat', {
                             receiver: item.addr,
+                            remark: item.remark,
                           });
                         }}>
                         <ChatItem
-                          avatar="https://placeimg.com/140/140/any"
+                          avatar={{uri: 'https://placeimg.com/140/140/any'}}
                           alt={'Reactjs'}
                           title={item.remark}
                           subtitle={''}
-                          date={new Date()}
-                          unread={0}
+                          date={
+                            item.messages[item.messages.length - 1].timestamp
+                          }
+                          unread={
+                            item.messages.filter(
+                              item => item.status === 'pending',
+                            ).length
+                          }
                         />
                       </Item>
                     ))}
                     <Item onPress={() => console.log(2424)}>
                       <ChatItem
-                        avatar={'https://placeimg.com/140/140/any'}
+                        avatar="https://placeimg.com/140/140/any"
                         alt={'Reactjs'}
                         title={'Facebook'}
                         subtitle={'What are you doing?'}

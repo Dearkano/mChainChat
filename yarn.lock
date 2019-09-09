@@ -4576,9 +4576,9 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-chat-elements@^10.7.1:
+react-chainchat-elements@^10.7.1:
   version "10.7.1"
-  resolved "https://registry.yarnpkg.com/react-chat-elements/-/react-chat-elements-10.7.1.tgz#46a82aa8efe5c8423d8e425936ebc54fa635b75e"
+  resolved "https://registry.yarnpkg.com/react-chainchat-elements/-/react-chainchat-elements-10.7.1.tgz#0b36298eb42d94c858ac240418376bba16b12f9f"
   dependencies:
     classnames "^2.2.5"
     react-icons "^2.2.5"
