@@ -16,11 +16,11 @@ const host = 'http://183.178.144.228:8100';
 const clusterOptions = [
   [
     {
-      value: '47.75.197.211:8085',
+      value: '47.75.197.211:8079',
       label: 'ACAC',
     },
     {
-      value: '139.159.244.231:8085',
+      value: '47.75.197.211:8081',
       label: 'AAAF',
     },
   ],
@@ -54,6 +54,7 @@ class Login extends React.Component {
   state = {
     username: '',
     password: '',
+    host: ['47.75.197.211:8079'],
   };
   login = async () => {
     const {username, password} = this.state;
@@ -125,6 +126,12 @@ class Login extends React.Component {
       addr,
     });
     await AsyncStorage.setItem('userInfo', userInfoStr);
+    const hs =
+      typeof this.state.host !== 'string'
+        ? this.state.host[0]
+        : this.state.host;
+    console.log(hs);
+    g.setHost(hs);
     g.login({
       username,
       token,
@@ -160,10 +167,12 @@ class Login extends React.Component {
       ws.emit('publicKey', JSON.stringify({publicKey: afid, username: addr}));
       g.setWs(ws);
     });
+    ws.on('newMes', async str => {
+      const obj = JSON.parse(str);
+      console.log('new mes');
+      await g.getFriendList();
+    });
 
-    g.setHost(this.state.host);
-
-    console.log(userInfoStr);
     this.props.navigation.navigate('Friend');
     //   this.props.navigation.navigate('Chat', {
     //     receiver: 'FuKTBcX8jUcQxg2FntSwx89GRmeXNCw5o6BjYmmEjWoV',

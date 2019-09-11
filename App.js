@@ -112,8 +112,8 @@ const AppStack = createStackNavigator(
   {initialRouteName: 'Friend', headerMode: 'none'},
 );
 const AuthStack = createStackNavigator(
-  {LoginIn: LoginScreen, Register: RegisterScreen},
-  {headerMode: 'none', initialRouteName: 'LoginIn'},
+  {LogIn: LoginScreen, Register: RegisterScreen},
+  {headerMode: 'none', initialRouteName: 'LogIn'},
 );
 //GLOBAL.XMLHttpRequest = GLOBAL.originalXMLHttpRequest || GLOBAL.XMLHttpRequest
 console.disableYellowBox = true;
