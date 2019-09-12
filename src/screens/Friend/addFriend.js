@@ -16,7 +16,7 @@ import {Buffer} from 'buffer';
 import sha256 from 'sha256';
 import g from '../../state';
 
-const afshost = 'http://183.178.144.228:8100';
+const afshost = 'http://10.6.71.79:8080';
 
 const styles = StyleSheet.create({
   col: {

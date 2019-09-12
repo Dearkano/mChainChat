@@ -1,7 +1,14 @@
 // 'use strict';
 import React from 'react';
 import {StyleSheet, View, Text, WebView, Component} from 'react-native';
-import {Button, InputItem, List, PickerView} from '@ant-design/react-native';
+import {
+  Button,
+  InputItem,
+  List,
+  PickerView,
+  Toast,
+  Provider,
+} from '@ant-design/react-native';
 import md5 from 'md5';
 import sha256 from 'sha256';
 import bs58 from 'bs58';
@@ -11,7 +18,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import g from '../../state';
 import io from 'socket.io-client';
 
-const host = 'http://183.178.144.228:8100';
+const host = 'http://10.6.71.79:8080';
 
 const clusterOptions = [
   [
@@ -59,6 +66,9 @@ class Login extends React.Component {
   login = async () => {
     const {username, password} = this.state;
     const timestampRes = await fetch(`${host}/auth/time`);
+    if (timestampRes.status !== 200) {
+      Toast.fail('Network error!');
+    }
     const timestampJson = await timestampRes.json();
     const timestamp = timestampJson.CurrentTimeStamp;
     const signature = md5(`${username}+${password}+${timestamp}`);
@@ -74,7 +84,10 @@ class Login extends React.Component {
     const data = await res.json();
     console.log(data);
     const isSuccess = data.SuccStatus > 0;
-    if (!isSuccess) return;
+    if (!isSuccess) {
+      Toast.fail('Username or password is incorrect!');
+      return;
+    }
     const token = data.Token;
     const expiredTime = data.ExpireAt;
 
@@ -186,35 +199,37 @@ class Login extends React.Component {
   render() {
     const {username, password} = this.state;
     return (
-      <View style={styles.col}>
-        <List renderHeader={''}>
-          <InputItem
-            value={username}
-            onChange={e => this.setState({username: e})}
-            placeholder="Username"
-          />
-          <InputItem
-            value={password}
-            onChange={e => this.setState({password: e})}
-            placeholder="Password"
-            type="password"
-          />
-          <PickerView
-            onChange={this.onChange}
-            value={this.state.host}
-            data={clusterOptions}
-            cascade={false}
-          />
-          <Button type="primary" onPress={() => this.login()}>
-            <Text>Login</Text>
-          </Button>
-        </List>
-        <Text
-          onPress={() => this.props.navigation.navigate('Register')}
-          style={styles.register}>
-          Register now!
-        </Text>
-      </View>
+      <Provider>
+        <View style={styles.col}>
+          <List renderHeader={''}>
+            <InputItem
+              value={username}
+              onChange={e => this.setState({username: e})}
+              placeholder="Username"
+            />
+            <InputItem
+              value={password}
+              onChange={e => this.setState({password: e})}
+              placeholder="Password"
+              type="password"
+            />
+            <PickerView
+              onChange={this.onChange}
+              value={this.state.host}
+              data={clusterOptions}
+              cascade={false}
+            />
+            <Button type="primary" onPress={() => this.login()}>
+              <Text>Login</Text>
+            </Button>
+          </List>
+          <Text
+            onPress={() => this.props.navigation.navigate('Register')}
+            style={styles.register}>
+            Register now!
+          </Text>
+        </View>
+      </Provider>
     );
   }
 }

@@ -18,7 +18,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import g from '../../state';
 import io from 'socket.io-client';
 
-const host = 'http://183.178.144.228:8100';
+const host = 'http://10.6.71.79:8080';
 
 const styles = StyleSheet.create({
   col: {
@@ -68,10 +68,16 @@ class Register extends React.Component {
       method: 'post',
       body,
     });
-    if (res.status !== 200) return;
+    if (res.status !== 200) {
+        Toast.fail('Network error!')
+        return;
+    }
     const data = await res.json();
     console.log(data);
-    if (data.SuccStatus <= 0) return;
+    if (data.SuccStatus <= 0) {
+        Toast.fail('The email address has already been used!')
+        return;
+    }
     const defaultPassword = data.Password;
     this.setState({
       step: 1,
@@ -107,7 +113,10 @@ class Register extends React.Component {
       method: 'post',
       body,
     });
-    if (res.status !== 200) return;
+    if (res.status !== 200) {
+        Toast.fail('Network error!')
+        return;
+    }
     const data = await res.json();
     console.log(data);
     if (data.SuccStatus <= 0) return;

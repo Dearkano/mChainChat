@@ -12,7 +12,7 @@ class GlobalState extends Container {
         messageList: [],
         ws: null,
         host: '',
-        afsHost: 'http://183.178.144.228:8100',
+        afsHost: 'http://10.6.71.79:8080',
     }
 
     login = userInfo => this.setState({

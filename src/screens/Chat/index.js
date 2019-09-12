@@ -29,6 +29,7 @@ const convertFile = async file => {
 };
 
 //const host = '139.159.244.231:8085';
+//const host1 = 'http://10.6.71.79:8080';
 const host1 = 'http://10.6.71.79:8080';
 // const receiver = 'FuKTBcX8jUcQxg2FntSwx89GRmeXNCw5o6BjYmmEjWoV';
 class App extends Component {
@@ -142,38 +143,70 @@ class App extends Component {
     });
     ws.on('historytest', str => console.log('history test' + str));
     ws.on('history', async str => {
+      console.log(that.state.messages);
+      if (that.state.messages.length !== 1) return;
       console.log('history');
       const data = JSON.parse(str);
       console.log(data);
+      let newMessages = [];
       for (const item of data) {
-        const res = await fetch(
-          `${host1}/msg/download?token=${token}&afid=${item.afid}`,
-        );
-        const d = await res.json();
-        const obj = JSON.parse(d.Message);
-        let encrypt = new JsEncrypt();
-        encrypt.setPrivateKey(privateKey);
-        const ph = encrypt.decrypt(obj.ph) || this.state.AESKEY;
-        console.log('ph=' + ph);
-        const mes = CryptoJS.AES.decrypt(obj.cipher, ph).toString(
-          CryptoJS.enc.Utf8,
-        );
-        const receiverId =
-          item.sender === addr
-            ? Number('0x' + bs58.decode(addr).toString('hex'))
-            : Number('0x' + bs58.decode(receiver).toString('hex'));
-        const name = item.sender === addr ? addr : receiver;
-        const newMessages = [
-          {
-            text: mes,
-            createdAt: new Date(item.timestamp),
-            user: {
-              _id: receiverId,
-              name,
-              avatar: 'https://placeimg.com/140/140/any',
+        if (item.type === 'afid') {
+          const res = await fetch(
+            `${host1}/msg/download?token=${token}&afid=${item.afid}`,
+          );
+          const d = await res.json();
+          const obj = JSON.parse(d.Message);
+          let encrypt = new JsEncrypt();
+          encrypt.setPrivateKey(privateKey);
+          const ph = encrypt.decrypt(obj.ph) || this.state.AESKEY;
+          console.log(item);
+          const createdAt = new Date(parseInt(item.timestamp));
+          const mes = CryptoJS.AES.decrypt(obj.cipher, ph).toString(
+            CryptoJS.enc.Utf8,
+          );
+          const receiverId =
+            item.sender === addr
+              ? Number('0x' + bs58.decode(addr).toString('hex'))
+              : Number('0x' + bs58.decode(receiver).toString('hex'));
+          const name = item.sender === addr ? addr : receiver;
+
+          newMessages = [
+            {
+              text: mes,
+              createdAt,
+              user: {
+                _id: receiverId,
+                name,
+                avatar: 'https://placeimg.com/140/140/any',
+              },
+              _id: Math.round(Math.random() * 1000000),
             },
-          },
-        ];
+          ];
+        } else if (item.type === 'image') {
+          const res = await fetch(
+            `${host1}/file/download?token=${token}&afid=${item.afid}`,
+          );
+          const data = await res.blob();
+          const base64 = await convertFile(data);
+          console.log(base64);
+          const receiverId =
+            item.sender === addr
+              ? Number('0x' + bs58.decode(addr).toString('hex'))
+              : Number('0x' + bs58.decode(receiver).toString('hex'));
+          const name = item.sender === addr ? addr : receiver;
+          newMessages = [
+            {
+              image: base64,
+              createdAt: new Date(parseInt(item.timestamp)),
+              user: {
+                _id: receiverId,
+                name,
+                avatar: 'https://placeimg.com/140/140/any',
+              },
+              _id: Math.round(Math.random() * 1000000),
+            },
+          ];
+        }
         this.setState({
           messages: this.state.messages.concat(newMessages),
           loadEarlier: false,
@@ -448,34 +481,6 @@ class App extends Component {
     return null;
   };
 
-  onQuickReply = replies => {
-    console.log({replies});
-    const createdAt = new Date();
-    if (replies.length === 1) {
-      this.onSend([
-        {
-          createdAt,
-          _id: Math.round(Math.random() * 1000000),
-          text: replies[0].title,
-          user,
-        },
-      ]);
-    } else if (replies.length > 1) {
-      this.onSend([
-        {
-          createdAt,
-          _id: Math.round(Math.random() * 1000000),
-          text: replies.map(reply => reply.title).join(', '),
-          user,
-        },
-      ]);
-    } else {
-      console.warn('replies param is not set correctly');
-    }
-  };
-
-  renderQuickReplySend = () => <Text>{' custom send =>'}</Text>;
-
   showModal = () => {
     this.setState({visible: true});
   };
@@ -484,7 +489,7 @@ class App extends Component {
     if (!this.state.userInfo) return;
     const receiver = this.props.navigation.getParam('receiver');
     await g.changeRemark(receiver, this.state.remark);
-    await g.getFriendList()
+    await g.getFriendList();
     this.setState({visible: false});
   };
 
@@ -521,7 +526,11 @@ class App extends Component {
               placeholder="Remark"
             />
           </Modal>
-          <NavBar user={this.state.remark} addr={receiver} showModal={this.showModal} />
+          <NavBar
+            user={this.state.remark}
+            addr={receiver}
+            showModal={this.showModal}
+          />
 
           <GiftedChat
             messages={messages.reverse()}
@@ -538,7 +547,6 @@ class App extends Component {
             renderSystemMessage={this.renderSystemMessage}
             //   renderCustomView={this.renderCustomView}
             renderFooter={this.renderFooter}
-            quickReplyStyle={{borderRadius: 2}}
           />
         </Provider>
       </View>
