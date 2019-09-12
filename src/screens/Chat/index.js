@@ -15,6 +15,7 @@ import bs58 from 'bs58';
 import g from '../../state';
 import {Generate_key} from '../../utils';
 import {Provider, Modal, InputItem} from '@ant-design/react-native';
+const config = require('../../config.json')
 const CryptoJS = require('crypto-js');
 
 const styles = StyleSheet.create({
@@ -30,7 +31,7 @@ const convertFile = async file => {
 
 //const host = '139.159.244.231:8085';
 //const host1 = 'http://10.6.71.79:8080';
-const host1 = 'http://10.6.71.79:8080';
+const host1 = config.bos;
 // const receiver = 'FuKTBcX8jUcQxg2FntSwx89GRmeXNCw5o6BjYmmEjWoV';
 class App extends Component {
   state = {

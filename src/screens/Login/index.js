@@ -17,8 +17,8 @@ import {withNavigation} from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import g from '../../state';
 import io from 'socket.io-client';
-
-const host = 'http://10.6.71.79:8080';
+const config = require('../../config.json')
+const host = config.bos;
 
 const clusterOptions = [
   [

@@ -15,8 +15,8 @@ import bs58 from 'bs58';
 import {Buffer} from 'buffer';
 import sha256 from 'sha256';
 import g from '../../state';
-
-const afshost = 'http://10.6.71.79:8080';
+const config = require('../../config.json')
+const afshost = config.bos;
 
 const styles = StyleSheet.create({
   col: {
