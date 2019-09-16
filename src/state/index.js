@@ -264,7 +264,9 @@ class GlobalState extends Container {
 
     logout = e => this.setState({
         userInfo: null,
-        ws: null
+        ws: null,
+        friendList:[],
+        messageList:[]
     })
 }
 

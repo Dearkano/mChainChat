@@ -2,7 +2,7 @@ import {
     Linking,
     Alert
 } from 'react-native'
-import Location from 'react-native-location'
+//import Location from 'react-native-location'
 import Permissions from 'react-native-permissions'
 import ImagePicker from 'react-native-image-picker'
 console.log(Permissions)
@@ -34,16 +34,16 @@ export default async function getPermissionAsync(permission) {
     return true
 }
 
-export async function getLocationAsync(onSend) {
-    if (await getPermissionAsync('location')) {
-        const location = await Location.getCurrentPositionAsync({})
-        if (location) {
-            onSend([{
-                location: location.coords
-            }])
-        }
-    }
-}
+// export async function getLocationAsync(onSend) {
+//     if (await getPermissionAsync('location')) {
+//         const location = await Location.getCurrentPositionAsync({})
+//         if (location) {
+//             onSend([{
+//                 location: location.coords
+//             }])
+//         }
+//     }
+// }
 
 export async function pickImageAsync(onSend) {
     if (await getPermissionAsync('photo')) {

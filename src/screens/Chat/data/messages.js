@@ -129,7 +129,7 @@ export default [
   },
   {
     _id: 9,
-    text: 'You are officially rocking GiftedChat.',
+    text: 'You are officially rocking ChainChat.',
     createdAt: new Date(),
     system: true,
   },

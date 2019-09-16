@@ -15,7 +15,8 @@ import bs58 from 'bs58';
 import g from '../../state';
 import {Generate_key} from '../../utils';
 import {Provider, Modal, InputItem} from '@ant-design/react-native';
-const config = require('../../config.json')
+//import ImageResizer from 'react-native-image-resizer';
+const config = require('../../config.json');
 const CryptoJS = require('crypto-js');
 
 const styles = StyleSheet.create({
@@ -47,9 +48,86 @@ class App extends Component {
     encryptedAESKEY: '',
     visible: false,
     remark: this.props.navigation.getParam('remark'),
+    historyData: [],
   };
 
   _isMounted = false;
+
+  loadHistory = async () => {
+    const {token, addr, publicKey, privateKey} = g.state.userInfo;
+    const data = this.state.historyData;
+    const receiver = this.props.navigation.getParam('receiver');
+    console.log('start load history')
+    this.setState({
+        loadEarlier: false,
+        isLoadingEarlier: false,
+    })
+    console.log(data)
+    let newMessages = [];
+    for (const item of data) {
+      if (item.type === 'afid') {
+        const res = await fetch(
+          `${host1}/msg/download?token=${token}&afid=${item.afid}`,
+        );
+        const d = await res.json();
+        const obj = JSON.parse(d.Message);
+        let encrypt = new JsEncrypt();
+        encrypt.setPrivateKey(privateKey);
+        const ph = encrypt.decrypt(obj.ph) || this.state.AESKEY;
+        console.log(item);
+        const createdAt = new Date(parseInt(item.timestamp));
+        const mes = CryptoJS.AES.decrypt(obj.cipher, ph).toString(
+          CryptoJS.enc.Utf8,
+        );
+        const receiverId =
+          item.sender === addr
+            ? Number('0x' + bs58.decode(addr).toString('hex'))
+            : Number('0x' + bs58.decode(receiver).toString('hex'));
+        const name = item.sender === addr ? addr : receiver;
+
+        newMessages = [
+          {
+            text: mes,
+            createdAt,
+            user: {
+              _id: receiverId,
+              name,
+              avatar: 'https://placeimg.com/140/140/any',
+            },
+            _id: Math.round(Math.random() * 1000000),
+          },
+        ];
+      } else if (item.type === 'image') {
+        const res = await fetch(
+          `${host1}/file/download?token=${token}&afid=${item.afid}`,
+        );
+        const data = await res.blob();
+        const base64 = await convertFile(data);
+        console.log(base64);
+        const receiverId =
+          item.sender === addr
+            ? Number('0x' + bs58.decode(addr).toString('hex'))
+            : Number('0x' + bs58.decode(receiver).toString('hex'));
+        const name = item.sender === addr ? addr : receiver;
+        newMessages = [
+          {
+            image: base64,
+            createdAt: new Date(parseInt(item.timestamp)),
+            user: {
+              _id: receiverId,
+              name,
+              avatar: 'https://placeimg.com/140/140/any',
+            },
+            _id: Math.round(Math.random() * 1000000),
+          },
+        ];
+      }
+      this.setState({
+        messages: this.state.messages.concat(newMessages)
+      });
+    }
+
+  };
 
   async componentDidMount() {
     const host = g.state.host;
@@ -149,71 +227,7 @@ class App extends Component {
       console.log('history');
       const data = JSON.parse(str);
       console.log(data);
-      let newMessages = [];
-      for (const item of data) {
-        if (item.type === 'afid') {
-          const res = await fetch(
-            `${host1}/msg/download?token=${token}&afid=${item.afid}`,
-          );
-          const d = await res.json();
-          const obj = JSON.parse(d.Message);
-          let encrypt = new JsEncrypt();
-          encrypt.setPrivateKey(privateKey);
-          const ph = encrypt.decrypt(obj.ph) || this.state.AESKEY;
-          console.log(item);
-          const createdAt = new Date(parseInt(item.timestamp));
-          const mes = CryptoJS.AES.decrypt(obj.cipher, ph).toString(
-            CryptoJS.enc.Utf8,
-          );
-          const receiverId =
-            item.sender === addr
-              ? Number('0x' + bs58.decode(addr).toString('hex'))
-              : Number('0x' + bs58.decode(receiver).toString('hex'));
-          const name = item.sender === addr ? addr : receiver;
-
-          newMessages = [
-            {
-              text: mes,
-              createdAt,
-              user: {
-                _id: receiverId,
-                name,
-                avatar: 'https://placeimg.com/140/140/any',
-              },
-              _id: Math.round(Math.random() * 1000000),
-            },
-          ];
-        } else if (item.type === 'image') {
-          const res = await fetch(
-            `${host1}/file/download?token=${token}&afid=${item.afid}`,
-          );
-          const data = await res.blob();
-          const base64 = await convertFile(data);
-          console.log(base64);
-          const receiverId =
-            item.sender === addr
-              ? Number('0x' + bs58.decode(addr).toString('hex'))
-              : Number('0x' + bs58.decode(receiver).toString('hex'));
-          const name = item.sender === addr ? addr : receiver;
-          newMessages = [
-            {
-              image: base64,
-              createdAt: new Date(parseInt(item.timestamp)),
-              user: {
-                _id: receiverId,
-                name,
-                avatar: 'https://placeimg.com/140/140/any',
-              },
-              _id: Math.round(Math.random() * 1000000),
-            },
-          ];
-        }
-        this.setState({
-          messages: this.state.messages.concat(newMessages),
-          loadEarlier: false,
-          isLoadingEarlier: false,
-        });
-      }
+      that.setState({historyData: data});
     });
 
     ws.on('res', async str => {
@@ -324,10 +338,35 @@ class App extends Component {
     // get userInfo
     const {userInfo} = this.state;
     const {token, addr, publicKey, privateKey} = userInfo;
+    const userId = Number('0x' + bs58.decode(addr).toString('hex'));
+    console.log('userid' + userId);
+
+    const text = messages[0].text;
+    this.setState(previousState => {
+        const sentMessages = [
+          {
+            text,
+            createdAt: new Date(),
+            user: {
+              _id: userId,
+              name: addr,
+              avatar: 'https://placeimg.com/140/140/any',
+            },
+            _id: Math.round(Math.random() * 1000000),
+          },
+        ];
+        return {
+          messages: previousState.messages.concat(sentMessages),
+          step,
+        };
+      });
 
     const body = new FormData();
     body.append('token', token);
-    const text = messages[0].text;
+
+    if(messages[0].text===''){
+        return
+    }
     const cipher = CryptoJS.AES.encrypt(text, this.state.AESKEY).toString();
     const content = JSON.stringify({
       ph: this.state.encryptedAESKEY,
@@ -351,26 +390,7 @@ class App extends Component {
         data: afid,
       }),
     );
-    const userId = Number('0x' + bs58.decode(addr).toString('hex'));
-    console.log('userid' + userId);
-    this.setState(previousState => {
-      const sentMessages = [
-        {
-          text,
-          createdAt: new Date(),
-          user: {
-            _id: userId,
-            name: addr,
-            avatar: 'https://placeimg.com/140/140/any',
-          },
-          _id: Math.round(Math.random() * 1000000),
-        },
-      ];
-      return {
-        messages: previousState.messages.concat(sentMessages),
-        step,
-      };
-    });
+
     // for demo purpose
     // setTimeout(() => this.botSend(step), Math.round(Math.random() * 1000));
   };
@@ -395,7 +415,18 @@ class App extends Component {
     const {token, addr, publicKey, privateKey} = userInfo;
     const body = new FormData();
     body.append('token', token);
-    const file = messages[0].file;
+    const file = messages[0].file
+    // const uncompressedFile = messages[0].file;
+    // var options = {
+    //     maxSizeMB: 1,
+    //     maxWidthOrHeight: 1920,
+    //     useWebWorker: true
+    //   }
+    // const file = await imageCompression(uncompressedFile, options);
+    // console.log(uncompressedFile)
+    // console.log(uncompressedFile)
+    // const file = await ImageResizer.createResizedImage(uncompressedFile.uri, 8, 6, 'JPEG', 80)
+    // console.log(file)
     body.append('file', {
       name: file.fileName,
       type: file.type,
@@ -405,7 +436,8 @@ class App extends Component {
     Object.keys(file).forEach(key => {
       body.append(key, body[key]);
     });
-
+    console.log('body')
+    console.log(body)
     const userId = Number('0x' + bs58.decode(addr).toString('hex'));
     this.setState(previousState => {
       const sentMessages = [
@@ -425,7 +457,9 @@ class App extends Component {
       };
     });
     const res = await fetch(`${host1}/file/upload`, {method: 'post', body});
+    console.log(res)
     const data = await res.json();
+    console.log(data)
     if (data.SuccStatus <= 0) return;
     const afid = data.Afid;
     this.state.ws.emit(
@@ -531,13 +565,14 @@ class App extends Component {
             user={this.state.remark}
             addr={receiver}
             showModal={this.showModal}
+            showHistory={this.loadHistory}
           />
 
           <GiftedChat
             messages={messages.reverse()}
             onSend={this.onSend}
             loadEarlier={this.state.loadEarlier}
-            onLoadEarlier={this.onLoadEarlier}
+            onLoadEarlier={()=>this.loadHistory()}
             isLoadingEarlier={this.state.isLoadingEarlier}
             parsePatterns={this.parsePatterns}
             user={curUser}

@@ -17,18 +17,30 @@ import {withNavigation} from 'react-navigation';
 import AsyncStorage from '@react-native-community/async-storage';
 import g from '../../state';
 import io from 'socket.io-client';
-const config = require('../../config.json')
+const config = require('../../config.json');
 const host = config.bos;
 
 const clusterOptions = [
   [
+    // {
+    //   value: '47.75.197.211:8079',
+    //   label: 'ACAC',
+    // },
+    // {
+    //   value: '47.75.197.211:8081',
+    //   label: 'AAAF',
+    // },
+    // {
+    //     value: '47.75.197.211:8081',
+    //     label: 'AAAF',
+    //   },
     {
-      value: '47.75.197.211:8079',
-      label: 'ACAC',
+      value: '47.52.206.176:8008',
+      label: '9220',
     },
     {
-      value: '47.75.197.211:8081',
-      label: 'AAAF',
+      value: '47.75.197.211:8008',
+      label: '9221',
     },
   ],
 ];
@@ -61,7 +73,7 @@ class Login extends React.Component {
   state = {
     username: '',
     password: '',
-    host: ['47.75.197.211:8079'],
+    host: ['47.52.206.176:8008'],
   };
   login = async () => {
     const {username, password} = this.state;
